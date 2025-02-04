@@ -64,6 +64,9 @@ struct PizzaListView: View {
                 }
                 .sheet(item: $selectedPizza) { pizza in
                     PizzaDetailView(pizza: pizza)
+                        .onDisappear {
+                            viewModel.getAllPizzas() // Refresh the list when returning from detail view
+                        }
                 }
             }
         }
