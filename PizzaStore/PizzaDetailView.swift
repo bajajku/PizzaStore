@@ -1,3 +1,5 @@
+import SwiftUI
+
 struct PizzaDetailView: View {
     let pizza: Pizza
     @Environment(\.dismiss) private var dismiss

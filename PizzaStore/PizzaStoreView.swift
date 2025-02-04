@@ -72,35 +72,3 @@ struct PizzaListView: View {
         }
     }
 }
-
-struct PizzaDetailView: View {
-    let pizza: Pizza
-
-    var body: some View {
-        VStack(spacing: 16) {
-            // Pizza image from URL
-            AsyncImage(url: URL(string: pizza.image)) { image in
-                image.resizable()
-                    .scaledToFit()
-                    .frame(width: 250, height: 250)
-            } placeholder: {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle())
-                    .frame(width: 250, height: 250)
-            }
-
-            Text(pizza.name)
-                .font(.largeTitle)
-                .bold()
-
-            Text("ID: \(pizza.id)")
-                .font(.title)
-
-            Text("Description: \(pizza.name)") // Replace with more detailed description if available
-                .font(.body)
-
-            Spacer()
-        }
-        .padding()
-    }
-}
