@@ -7,6 +7,8 @@ struct EditPizzaView: View {
     
     @State private var name: String
     @State private var image: String
+    @State private var showAlert = false
+    @State private var alertMessage = ""
     
     init(pizza: Pizza) {
         self.pizza = pizza
@@ -24,8 +26,11 @@ struct EditPizzaView: View {
                     let updatedPizza = Pizza(id: pizza.id, name: name, image: image)
                     viewModel.updatePizza(id: pizza.id, updatedPizza: updatedPizza) { success in
                         if success {
-                            dismiss()
+                            alertMessage = "Pizza updated successfully!"
+                        } else {
+                            alertMessage = "Failed to update pizza. Please try again."
                         }
+                        showAlert = true
                     }
                 }
                 .disabled(name.isEmpty || image.isEmpty)
@@ -34,6 +39,13 @@ struct EditPizzaView: View {
             .navigationBarItems(trailing: Button("Cancel") {
                 dismiss()
             })
+            .alert(alertMessage, isPresented: $showAlert) {
+                Button("OK") {
+                    if alertMessage == "Pizza updated successfully!" {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
-} 
+}

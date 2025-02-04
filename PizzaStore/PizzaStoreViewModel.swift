@@ -184,4 +184,55 @@ class PizzaStoreViewModel: ObservableObject {
             completion(false)
         }
     }
+    
+    func createPizza(name: String, image: String, completion: @escaping (Bool) -> Void) {
+        let endpoint = "/pizzas"
+        guard let url = URL(string: baseUrl + endpoint) else {
+            print("Invalid URL for creating pizza")
+            completion(false)
+            return
+        }
+        
+        print("Creating new pizza at: \(url)")
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Create a temporary pizza object with ID 0 (server will assign real ID)
+        let newPizza = Pizza(id: 0, name: name, image: image)
+        
+        do {
+            let jsonData = try JSONEncoder().encode(newPizza)
+            request.httpBody = jsonData
+            
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("Error creating pizza: \(error.localizedDescription)")
+                    completion(false)
+                    return
+                }
+                
+                if let httpResponse = response as? HTTPURLResponse {
+                    if (200...299).contains(httpResponse.statusCode) {
+                        DispatchQueue.main.async {
+                            print("Successfully created new pizza")
+                            self.getAllPizzas() // Refresh the pizza list
+                            completion(true)
+                        }
+                    } else {
+                        print("Failed to create pizza, status code: \(httpResponse.statusCode)")
+                        completion(false)
+                    }
+                } else {
+                    print("Invalid response for creating pizza")
+                    completion(false)
+                }
+            }
+            task.resume()
+        } catch {
+            print("Error encoding pizza data: \(error.localizedDescription)")
+            completion(false)
+        }
+    }
 }

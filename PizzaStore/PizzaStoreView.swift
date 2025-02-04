@@ -11,11 +11,15 @@ struct PizzaListView: View {
     @StateObject private var viewModel = PizzaStoreViewModel()
     @State private var selectedPizza: Pizza?
     @State private var pizzaIdToFetch: String = "" // To store the ID for fetching pizza by ID
+    @State private var showingAddPizza = false
 
     var body: some View {
         NavigationView {
             VStack {
                 // Button to fetch pizza by ID
+                Button("Reload Pizzas") {
+                    viewModel.getAllPizzas()
+                }
                 HStack {
                     TextField("Enter Pizza ID", text: $pizzaIdToFetch)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -59,8 +63,16 @@ struct PizzaListView: View {
                     }
                 }
                 .navigationTitle("Pizza Menu 🍕")
+                .navigationBarItems(trailing: Button(action: {
+                    showingAddPizza = true
+                }) {
+                    Image(systemName: "plus")
+                })
                 .onAppear {
                     viewModel.getAllPizzas()
+                }
+                .sheet(isPresented: $showingAddPizza) {
+                    AddPizzaView()
                 }
                 .sheet(item: $selectedPizza) { pizza in
                     PizzaDetailView(pizza: pizza)

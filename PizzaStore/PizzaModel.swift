@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Pizza: Identifiable, Decodable {
+struct Pizza: Identifiable, Decodable, Encodable {
     let id: Int
     let name: String
     let image: String
