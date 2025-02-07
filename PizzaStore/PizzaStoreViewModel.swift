@@ -325,6 +325,86 @@ class PizzaStoreViewModel: ObservableObject {
         task.resume()
     }
     
+    func updateCartItem(id: Int, updatedCartItem: CartItem, completion: @escaping (Bool) -> Void) {
+        let endpoint = "/pizzas/\(id)"
+        guard let url = URL(string: baseUrl + endpoint) else {
+            print("Invalid URL for updating pizza with ID: \(id)")
+            completion(false)
+            return
+        }
+        
+        print("Updating pizza with ID: \(id) at: \(url)")
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            let jsonData = try JSONEncoder().encode(updatedCartItem)
+            request.httpBody = jsonData
+            
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("Error updating pizza with ID \(id): \(error.localizedDescription)")
+                    completion(false)
+                    return
+                }
+                
+                if let httpResponse = response as? HTTPURLResponse {
+                    if (200...299).contains(httpResponse.statusCode) {
+                        DispatchQueue.main.async {
+                            print("Successfully updated pizza with ID: \(id)")
+                            self.getAllPizzas() // Refresh the pizza list
+                            completion(true)
+                        }
+                    } else {
+                        print("Failed to update pizza with ID: \(id), status code: \(httpResponse.statusCode)")
+                        completion(false)
+                    }
+                } else {
+                    print("Invalid response for updating pizza with ID: \(id)")
+                    completion(false)
+                }
+            }
+            task.resume()
+        } catch {
+            print("Error encoding pizza data: \(error.localizedDescription)")
+            completion(false)
+        }
+    }
+
+    func deleteCartItem(id: Int, completion: @escaping (Bool) -> Void) {
+        let endpoint = "/cart/\(id)"
+        guard let url = URL(string: baseUrl + endpoint) else {
+            print("Invalid URL for deleting cart item")
+            completion(false)
+            return
+        }
+        
+        print("Deleting cart item at: \(url)")
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error deleting cart item: \(error.localizedDescription)")
+                completion(false)
+                return
+            }
+            
+            if let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) {
+                DispatchQueue.main.async {
+                    print("Successfully deleted cart item")
+                    completion(true)
+                }
+            } else {
+                print("Failed to delete cart item")
+                completion(false)
+            }
+        }
+        task.resume()
+    }
     
         
 }
