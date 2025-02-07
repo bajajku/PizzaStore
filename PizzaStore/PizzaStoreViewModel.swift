@@ -17,6 +17,7 @@ import Foundation
 class PizzaStoreViewModel: ObservableObject {
     
     @Published var pizzas = [Pizza]()  // Added @Published to update views dynamically
+    @Published var cartItems = [CartItem]()  // Added @Published to update views dynamically
     let baseUrl = "https://silver-adventure-w64wv5w44963xq7-5148.app.github.dev"
     
     func getAllPizzas() {
@@ -235,4 +236,95 @@ class PizzaStoreViewModel: ObservableObject {
             completion(false)
         }
     }
+    
+    func addToCart(quantity: Int, pizza: Pizza, completion: @escaping (Bool) -> Void) {
+        let endpoint = "/cart"
+        guard let url = URL(string: baseUrl + endpoint) else {
+            print("Invalid URL for creating pizza")
+            completion(false)
+            return
+        }
+        
+        print("Creating new pizza at: \(url)")
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Create a temporary pizza object with ID 0 (server will assign real ID)
+        let cartItem = CartItem(id: 0, pizzaId: pizza.id, quantity: quantity, pizza: pizza)
+        
+        do {
+            let jsonData = try JSONEncoder().encode(cartItem)
+            request.httpBody = jsonData
+            
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("Error creating pizza: \(error.localizedDescription)")
+                    completion(false)
+                    return
+                }
+                
+                if let httpResponse = response as? HTTPURLResponse {
+                    if (200...299).contains(httpResponse.statusCode) {
+                        DispatchQueue.main.async {
+                            print("Successfully created new pizza")
+                            completion(true)
+                        }
+                    } else {
+                        print("Failed to create pizza, status code: \(httpResponse.statusCode)")
+                        completion(false)
+                    }
+                } else {
+                    print("Invalid response for creating pizza")
+                    completion(false)
+                }
+            }
+            task.resume()
+        } catch {
+            print("Error encoding pizza data: \(error.localizedDescription)")
+            completion(false)
+        }
+    }
+    
+    func getCartItems() {
+        let endpoint = "/cart"
+        guard let url = URL(string: baseUrl + endpoint) else {
+            print("Invalid URL for fetching all pizzas.")
+            return
+        }
+        
+        print("Fetching all pizzas from: \(url)")
+        
+        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                print("Error fetching all pizzas: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let data = data else {
+                print("No data received when fetching all pizzas.")
+                return
+            }
+
+            // Print raw JSON data for debugging
+            if let dataString = String(data: data, encoding: .utf8) {
+                print("Raw JSON Data for all pizzas: \(dataString)")
+            }
+            
+            do {
+                let decodedResponse = try JSONDecoder().decode([CartItem].self, from: data)
+                DispatchQueue.main.async {
+                    print("Successfully fetched all pizzas: \(decodedResponse)")
+                    self.cartItems = decodedResponse
+                }
+            } catch {
+                print("Decoding error for all pizzas: \(error.localizedDescription)")
+            }
+        }
+        task.resume()
+    }
+    
+    
+        
 }

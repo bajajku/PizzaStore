@@ -27,16 +27,26 @@ struct PizzaDetailView: View {
                 .font(.title)
             
             HStack(spacing: 20) {
-                Button("Edit") {
-                    showingEditSheet = true
+//                Button("Edit") {
+//                    showingEditSheet = true
+//                }
+//                .buttonStyle(.bordered)
+//                
+//                Button("Delete") {
+//                    showingDeleteAlert = true
+//                }
+//                .buttonStyle(.borderedProminent)
+//                .tint(.red)
+                Button("Add Pizza") {
+                    
+                    viewModel.addToCart(quantity: 2, pizza: pizza){ success in
+                        if success {
+                            dismiss()
+                        } else {
+                            let alertMessage = "Failed to create pizza"
+                        }
+                    }
                 }
-                .buttonStyle(.bordered)
-                
-                Button("Delete") {
-                    showingDeleteAlert = true
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.red)
             }
             
             Spacer()
