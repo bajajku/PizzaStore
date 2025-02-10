@@ -237,7 +237,7 @@ class PizzaStoreViewModel: ObservableObject {
         }
     }
     
-    func addToCart(quantity: Int, pizza: Pizza, completion: @escaping (Bool) -> Void) {
+    func addToCart(quantity: Int, pizzaId: Int, completion: @escaping (Bool) -> Void) {
         let endpoint = "/cart"
         guard let url = URL(string: baseUrl + endpoint) else {
             print("Invalid URL for creating pizza")
@@ -252,7 +252,7 @@ class PizzaStoreViewModel: ObservableObject {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         // Create a temporary pizza object with ID 0 (server will assign real ID)
-        let cartItem = CartItem(id: 0, pizzaId: pizza.id, quantity: quantity, pizza: pizza)
+        let cartItem = CartItem(id: 0, pizzaId: pizzaId, quantity: quantity, pizza: nil)
         
         do {
             let jsonData = try JSONEncoder().encode(cartItem)
@@ -287,39 +287,35 @@ class PizzaStoreViewModel: ObservableObject {
         }
     }
     
-    func getCartItems() {
+    func fetchCartItems(completion: @escaping ([CartItem]?) -> Void) {
         let endpoint = "/cart"
         guard let url = URL(string: baseUrl + endpoint) else {
-            print("Invalid URL for fetching all pizzas.")
+            print("Invalid URL")
+            completion(nil)
             return
         }
-        
-        print("Fetching all pizzas from: \(url)")
-        
+
         let task = URLSession.shared.dataTask(with: url) { data, response, error in
             if let error = error {
-                print("Error fetching all pizzas: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let data = data else {
-                print("No data received when fetching all pizzas.")
+                print("Error fetching cart items: \(error.localizedDescription)")
+                completion(nil)
                 return
             }
 
-            // Print raw JSON data for debugging
-            if let dataString = String(data: data, encoding: .utf8) {
-                print("Raw JSON Data for all pizzas: \(dataString)")
+            guard let data = data else {
+                print("No data received")
+                completion(nil)
+                return
             }
-            
+
             do {
-                let decodedResponse = try JSONDecoder().decode([CartItem].self, from: data)
+                let cartItems = try JSONDecoder().decode([CartItem].self, from: data)
                 DispatchQueue.main.async {
-                    print("Successfully fetched all pizzas: \(decodedResponse)")
-                    self.cartItems = decodedResponse
+                    completion(cartItems)
                 }
             } catch {
-                print("Decoding error for all pizzas: \(error.localizedDescription)")
+                print("Error decoding cart items: \(error.localizedDescription)")
+                completion(nil)
             }
         }
         task.resume()

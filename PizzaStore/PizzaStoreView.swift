@@ -11,7 +11,7 @@ struct PizzaListView: View {
     @StateObject private var viewModel = PizzaStoreViewModel()
     @State private var selectedPizza: Pizza?
     @State private var pizzaIdToFetch: String = "" // To store the ID for fetching pizza by ID
-    @State private var showingAddPizza = false
+    @State private var showingCart = false
 
     var body: some View {
         NavigationView {
@@ -64,15 +64,15 @@ struct PizzaListView: View {
                 }
                 .navigationTitle("Pizza Menu 🍕")
                 .navigationBarItems(trailing: Button(action: {
-                    showingAddPizza = true
+                    showingCart = true
                 }) {
-                    Image(systemName: "plus")
+                    Image(systemName: "cart")
                 })
                 .onAppear {
                     viewModel.getAllPizzas()
                 }
-                .sheet(isPresented: $showingAddPizza) {
-                    AddPizzaView()
+                .sheet(isPresented: $showingCart) {
+                    CartView()
                 }
                 .sheet(item: $selectedPizza) { pizza in
                     PizzaDetailView(pizza: pizza)

@@ -17,7 +17,5 @@ struct CartItem: Identifiable, Decodable, Encodable {
     let id: Int
     let pizzaId: Int
     let quantity: Int
-    
     let pizza: Pizza?
-    
 }
