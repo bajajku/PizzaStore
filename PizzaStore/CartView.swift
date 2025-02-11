@@ -20,6 +20,9 @@ struct CartView: View {
                                     .font(.subheadline)
                             }
                             Spacer()
+                            NavigationLink(destination: PizzaDetailView(pizza: item.pizza!, cartItem: item)) {
+                                EmptyView()
+                            }
                         }
                     }
                 }

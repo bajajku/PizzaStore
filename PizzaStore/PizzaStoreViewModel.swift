@@ -322,7 +322,7 @@ class PizzaStoreViewModel: ObservableObject {
     }
     
     func updateCartItem(id: Int, updatedCartItem: CartItem, completion: @escaping (Bool) -> Void) {
-        let endpoint = "/pizzas/\(id)"
+        let endpoint = "/cart/\(id)"
         guard let url = URL(string: baseUrl + endpoint) else {
             print("Invalid URL for updating pizza with ID: \(id)")
             completion(false)
